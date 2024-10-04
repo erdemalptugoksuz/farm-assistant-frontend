@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (response && response.status === 401) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Email or password wrong!' }, { status: 401 });
     }
 
     if (response && response.status) {
