@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import Cookies from 'js-cookie';
 
 import { NEXT_PUBLIC_COOKIE_TOKEN_NAME } from '@/utils/appConstants';
 
@@ -8,13 +9,22 @@ const TokenChecker = () => {
   useEffect(() => {
     const checkToken = async () => {
       try {
-        if (!NEXT_PUBLIC_COOKIE_TOKEN_NAME || !document.cookie.includes(NEXT_PUBLIC_COOKIE_TOKEN_NAME)) {
+        console.log('Checking token...');
+        if (!NEXT_PUBLIC_COOKIE_TOKEN_NAME) {
+          console.log('No token name found...');
+          return;
+        }
+        const accessToken = Cookies.get(NEXT_PUBLIC_COOKIE_TOKEN_NAME);
+        if (!accessToken) {
           console.log('No token found...');
           return;
         }
         console.log('Checking token...');
 
-        const response = await fetch('/api/auth/validate-token');
+        const response = await fetch('/api/auth/validate-token', {
+          method: 'POST',
+          body: JSON.stringify({ token: accessToken }),
+        });
 
         if (response.status === 401) {
           console.log('Token expired, refreshing...');
