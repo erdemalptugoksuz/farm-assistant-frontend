@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    if (response && response.status) {
+    if (response && response.data.status) {
       const token = response.data.data.access_token;
 
       if (NEXT_PUBLIC_COOKIE_TOKEN_NAME && token) {
@@ -34,10 +34,9 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json(response.data, { status: response.status });
     } else {
-      return NextResponse.json({ error: 'Error fetching sources' }, { status: 404 });
+      return NextResponse.json({ error: response.data.message }, { status: 404 });
     }
   } catch (error) {
-    console.log('error', error);
-    return NextResponse.json({ error: 'Critical error occurred' }, { status: 500 });
+    return NextResponse.json({ error: `Error: ${error}` }, { status: 500 });
   }
 }
