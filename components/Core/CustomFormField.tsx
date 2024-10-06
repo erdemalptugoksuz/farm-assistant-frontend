@@ -7,16 +7,15 @@ import { Control } from 'react-hook-form';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '../ui/checkbox';
+import { Select, SelectContent, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export enum FormFieldType {
   INPUT = 'input',
-  TEXTAREA = 'textarea',
-  PHONE_INPUT = 'phoneInput',
+  NUMBER = 'number',
   CHECKBOX = 'checkbox',
-  DATE_PICKER = 'datePicker',
-  SELECT = 'select',
-  SKELETON = 'skeleton',
   PASSWORD = 'password',
+  SELECT = 'select',
 }
 
 interface CustomProps {
@@ -31,6 +30,8 @@ interface CustomProps {
   dateFormat?: string;
   showTimeSelect?: boolean;
   children?: React.ReactNode;
+  infoText?: string;
+  labelColor?: string;
   renderSkeleton?: (field: any) => React.ReactNode;
 }
 
@@ -46,6 +47,15 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
           {iconSrc && <Image className="ml-2" src={iconSrc} height={24} width={24} alt={iconAlt || 'icon'} />}
           <FormControl>
             <Input className="shad-input border-0" placeholder={placeholder} {...field} />
+          </FormControl>
+        </div>
+      );
+    case FormFieldType.NUMBER:
+      return (
+        <div className="flex rounded-md bg-slate-800">
+          {iconSrc && <Image className="ml-2" src={iconSrc} height={24} width={24} alt={iconAlt || 'icon'} />}
+          <FormControl>
+            <Input className="shad-input border-0" placeholder={placeholder} type="number" {...field} />
           </FormControl>
         </div>
       );
@@ -80,13 +90,26 @@ const RenderField = ({ field, props }: { field: any; props: CustomProps }) => {
           </div>
         </FormControl>
       );
+    case FormFieldType.SELECT:
+      return (
+        <FormControl className="flex-1">
+          <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <FormControl>
+              <SelectTrigger className="shad-select-trigger">
+                <SelectValue placeholder={props.placeholder} />
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent className="shad-select-content">{props.children}</SelectContent>
+          </Select>
+        </FormControl>
+      );
     default:
       break;
   }
 };
 
 const CustomFormField = (props: CustomProps) => {
-  const { control, fieldType, name, label } = props;
+  const { control, fieldType, name, label, infoText, labelColor } = props;
 
   return (
     <FormField
@@ -94,7 +117,23 @@ const CustomFormField = (props: CustomProps) => {
       name={name}
       render={({ field }) => (
         <FormItem className="flex-1">
-          {fieldType !== FormFieldType.CHECKBOX && label && <FormLabel className="text-white">{label}</FormLabel>}
+          {fieldType !== FormFieldType.CHECKBOX && label && (
+            <div className="flex items-center justify-between">
+              <FormLabel className={labelColor}>{label}</FormLabel>
+              {infoText && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger type="button">
+                      <Image src="/assets/icons/info.svg" height={18} width={18} alt="info" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{infoText}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </div>
+          )}
           <RenderField field={field} props={props} />
           <FormMessage className="shad-error" />
         </FormItem>

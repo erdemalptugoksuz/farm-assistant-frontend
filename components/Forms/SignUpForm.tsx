@@ -54,7 +54,7 @@ const SignUpForm = () => {
           variant: 'destructive',
         });
       } else if (response.status) {
-        router.push('/');
+        router.push('/auth/register-your-farm');
       }
     } catch (error) {
       // console.log(error);
@@ -71,8 +71,8 @@ const SignUpForm = () => {
           </h1>
           <p className="text-dark-700 text-sm">Manage your field with ease!</p>
         </section>
-        <CustomFormField fieldType={FormFieldType.INPUT} control={form.control} name="name" label="Full name" placeholder="Old MacDonald" />
-        <CustomFormField fieldType={FormFieldType.INPUT} control={form.control} name="email" label="Email" placeholder="macdonald@farm.com" />
+        <CustomFormField fieldType={FormFieldType.INPUT} control={form.control} name="name" label="Full name" placeholder="Old MacDonald" labelColor="text-slate-50" />
+        <CustomFormField fieldType={FormFieldType.INPUT} control={form.control} name="email" label="Email" placeholder="macdonald@farm.com" labelColor="text-slate-50" />
         <CustomFormField
           fieldType={FormFieldType.PASSWORD}
           control={form.control}
@@ -81,6 +81,7 @@ const SignUpForm = () => {
           placeholder="your strong password"
           iconAlt="password"
           iconSrc="/assets/icons/eye.svg"
+          labelColor="text-slate-50"
         />
         <CustomFormField fieldType={FormFieldType.CHECKBOX} control={form.control} name="terms" label="I agree to the terms and conditions" />
         <SubmitButton isLoading={isLoading} buttonState={form.formState.isValid}>

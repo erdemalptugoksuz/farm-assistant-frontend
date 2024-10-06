@@ -51,7 +51,7 @@ const SignInForm = () => {
           variant: 'destructive',
         });
       } else if (response.status) {
-        router.push('/');
+        router.push('/farm');
       }
     } catch (error) {
     } finally {

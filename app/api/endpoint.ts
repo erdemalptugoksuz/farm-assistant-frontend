@@ -7,6 +7,6 @@ export const authEndpoint = {
   refreshSession: `${backendApiUrl}/auth/refresh-token`,
 };
 
-export const apiEndpoint = {
-  crudFarm: `${backendApiUrl}/api/farm`,
+export const farmEndpoint = {
+  crudFarm: `${backendApiUrl}/api/farm/`,
 };
