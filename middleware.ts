@@ -31,10 +31,15 @@ export async function middleware(req: NextRequest) {
   }
   const token = cookieStore.get(NEXT_PUBLIC_COOKIE_TOKEN_NAME)?.value || '';
   const urlWithoutParams = req.nextUrl.pathname;
+  const isValidToken = token ? await validateToken(token) : false;
 
   if (urlWithoutParams === '/auth/sign-in' || urlWithoutParams === '/auth/sign-up') {
-    const isValidToken = token ? await validateToken(token) : false;
     if (isValidToken) {
+      return NextResponse.redirect(`${frontendUrl}`);
+    }
+  }
+  if (urlWithoutParams === '/auth/register-your-farm') {
+    if (!isValidToken) {
       return NextResponse.redirect(`${frontendUrl}`);
     }
   }

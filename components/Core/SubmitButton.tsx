@@ -12,7 +12,7 @@ interface ButtonProps {
 
 const SubmitButton = ({ isLoading, buttonState, className, children }: ButtonProps) => {
   return (
-    <Button className={className ?? 'shad-primary-btn w-full'} type="submit">
+    <Button className={className ?? 'shad-primary-btn w-full'} type="submit" disabled={isLoading || !buttonState}>
       {isLoading ? (
         <div className="flex items-center gap-4">
           <Image className="animate-spin" src="/assets/icons/loader.svg" alt="loader" width={24} height={24} />

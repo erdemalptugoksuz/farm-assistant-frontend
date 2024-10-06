@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -8,11 +8,13 @@ import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import ReactConfetti from 'react-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
+
 import { Form } from '@/components/ui/form';
 import CustomFormField, { FormFieldType } from '../Core/CustomFormField';
 import SubmitButton from '../Core/SubmitButton';
 import { RegisterYourFarmValidation } from '@/lib/validation';
 import { MultiSelect } from '@/components/ui/multiselect';
+import { SelectItem } from '@/components/ui/select';
 
 interface RegisterYourFormProps {
   handleFormSubmit: () => void;
@@ -27,7 +29,7 @@ const RegisterYourForm: React.FC<RegisterYourFormProps> = ({ handleFormSubmit, s
 
   const [isLoading, setIsLoading] = useState(false);
   const [formCase, setFormCase] = useState<'case1' | 'case2' | 'case3'>('case1');
-  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+  const [facilities, setFacilities] = useState<string[]>([]);
   const [showConfetti, setShowConfetti] = useState(false);
   const [windowDimensions, setWindowDimensions] = useState({ width: 0, height: 0 });
 
@@ -50,20 +52,31 @@ const RegisterYourForm: React.FC<RegisterYourFormProps> = ({ handleFormSubmit, s
     }
   }, [step]);
 
-  const options = [
-    { value: 'option1', label: 'Electricity' },
-    { value: 'option2', label: 'Electricity' },
-    { value: 'option3', label: 'Electricity' },
-    { value: 'option4', label: 'Electricity' },
+  const infrastructurInformationOptions = [
+    { value: 'electricity', label: 'Electricity' },
+    { value: 'water', label: 'Water' },
+    { value: 'internet-network', label: 'Internet Network' },
+    { value: 'natural-gas', label: 'Natural Gas' },
   ];
+
+  const farmTypeOptions = ['Just field', 'With home', 'Big factory'];
+
+  const infoTexts = {
+    farmName: 'Your farm name like Jack Teller’s Farm',
+    farmAcreage: 'Your farm acreage like 578',
+    farmType: 'Your farm type like Just field',
+    farmLat: 'Please visit www.latlong.net/ for your location information',
+    farmLong: 'Please visit www.latlong.net/ for your location information',
+  };
 
   const form = useForm<z.infer<typeof RegisterYourFarmValidation>>({
     resolver: zodResolver(RegisterYourFarmValidation),
     defaultValues: {
-      farmName: '',
-      farmAcreage: '',
-      farmType: '',
-      farmOther: '',
+      name: '',
+      area: '',
+      farm_type: '',
+      location_lat: '',
+      location_long: '',
     },
   });
 
@@ -73,17 +86,10 @@ const RegisterYourForm: React.FC<RegisterYourFormProps> = ({ handleFormSubmit, s
 
     try {
       if (step === 2) {
-        handleFormSubmit();
+        const userData = { ...form.getValues(), facilities };
+        userData.area = parseInt(userData.area);
 
-        setTimeout(() => {
-          setShowConfetti(true);
-          setTimeout(() => {
-            setShowConfetti(false);
-          }, 5000);
-        }, 100);
-      } else if (step === totalStep) {
-        const userData = { ...form.getValues(), selectedOptions };
-        let response = await fetch('/api/auth/register-your-form', {
+        const response = await fetch('/api/farm/create-farm', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -92,23 +98,39 @@ const RegisterYourForm: React.FC<RegisterYourFormProps> = ({ handleFormSubmit, s
         });
 
         const data = await response.json();
+        console.log('data', data);
+        console.log('response', response);
 
-        if (data.error) {
+        if (response.ok) {
+          handleFormSubmit();
+          setTimeout(() => {
+            setShowConfetti(true);
+            setTimeout(() => {
+              setShowConfetti(false);
+            }, 5000);
+          }, 100);
+        } else if (response.status === 401) {
           toast({
-            title: 'Hata',
-            description: data.error,
+            title: 'Error',
+            description: 'You are not authorized to perform this action.',
             variant: 'destructive',
           });
-        } else if (response.ok) {
-          router.push('/');
+        } else {
+          toast({
+            title: 'Error',
+            description: 'Something went wrong. Please try again.',
+            variant: 'destructive',
+          });
         }
+      } else if (step === totalStep) {
+        window.location.href = '/';
       } else {
         handleFormSubmit();
       }
     } catch (error) {
       toast({
-        title: 'Hata',
-        description: 'Bir şeyler yanlış gitti. Lütfen tekrar deneyin.',
+        title: 'Error',
+        description: 'Something went wrong. Please try again.',
         variant: 'destructive',
       });
     } finally {
@@ -121,16 +143,55 @@ const RegisterYourForm: React.FC<RegisterYourFormProps> = ({ handleFormSubmit, s
       case 1:
         return (
           <div className="grid grid-cols-2 gap-x-5 gap-y-[30px]">
-            <CustomFormField fieldType={FormFieldType.INPUT} control={form.control} name="farmName" label="Farm Name" placeholder="Jack Teller’s Farm" />
-            <CustomFormField fieldType={FormFieldType.INPUT} control={form.control} name="farmAcreage" label="Farm Acreage" placeholder="578" />
-            <CustomFormField fieldType={FormFieldType.INPUT} control={form.control} name="farmType" label="Farm Type" placeholder="Select an option" />
-            <CustomFormField fieldType={FormFieldType.INPUT} control={form.control} name="farmOther" label="Other Field" placeholder="Other field" />
+            <CustomFormField
+              fieldType={FormFieldType.INPUT}
+              control={form.control}
+              name="name"
+              label="Farm Name"
+              placeholder="Jack Teller’s Farm"
+              infoText={infoTexts.farmName}
+              labelColor="text-slate-950"
+            />
+            <CustomFormField fieldType={FormFieldType.NUMBER} control={form.control} name="area" label="Farm Acreage" placeholder="578" infoText={infoTexts.farmAcreage} labelColor="text-slate-950" />
+            <CustomFormField
+              fieldType={FormFieldType.SELECT}
+              control={form.control}
+              name="farm_type"
+              label="Farm Type"
+              placeholder="Select your farm type"
+              infoText={infoTexts.farmType}
+              labelColor="text-slate-950"
+            >
+              {farmTypeOptions.map((option) => (
+                <SelectItem key={option} value={option}>
+                  {option}
+                </SelectItem>
+              ))}
+            </CustomFormField>
+            <CustomFormField
+              fieldType={FormFieldType.NUMBER}
+              control={form.control}
+              name="location_lat"
+              label="Latitude"
+              placeholder="42.12312312"
+              infoText={infoTexts.farmLat}
+              labelColor="text-slate-950"
+            />
+            <CustomFormField
+              fieldType={FormFieldType.NUMBER}
+              control={form.control}
+              name="location_long"
+              label="Longitude"
+              placeholder="21.123123321"
+              infoText={infoTexts.farmLong}
+              labelColor="text-slate-950"
+            />
           </div>
         );
       case 2:
         return (
           <div className="h-[182px]">
-            <MultiSelect options={options} onChange={setSelectedOptions} className="w-full" />
+            <MultiSelect options={infrastructurInformationOptions} onChange={setFacilities} className="w-full" />
           </div>
         );
       case 3:
@@ -155,7 +216,7 @@ const RegisterYourForm: React.FC<RegisterYourFormProps> = ({ handleFormSubmit, s
             </button>
           )}
 
-          <SubmitButton isLoading={isLoading} buttonState={form.formState.isValid}>
+          <SubmitButton isLoading={isLoading} buttonState={step === totalStep ? true : form.formState.isValid}>
             {step === totalStep ? 'Complete' : 'Next'}
           </SubmitButton>
         </div>
