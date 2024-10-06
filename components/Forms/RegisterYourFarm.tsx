@@ -75,8 +75,8 @@ const RegisterYourForm: React.FC<RegisterYourFormProps> = ({ handleFormSubmit, s
       name: '',
       area: '',
       farm_type: '',
-      location_lat: '',
-      location_long: '',
+      location_lat: 0,
+      location_long: 0,
     },
   });
 
@@ -87,7 +87,7 @@ const RegisterYourForm: React.FC<RegisterYourFormProps> = ({ handleFormSubmit, s
     try {
       if (step === 2) {
         const userData = { ...form.getValues(), facilities };
-        userData.area = parseInt(userData.area);
+        userData.area = parseInt(userData.area as string);
 
         const response = await fetch('/api/farm/create-farm', {
           method: 'POST',

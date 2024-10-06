@@ -14,7 +14,7 @@ const Header = () => {
   const [isValidToken, setIsValidToken] = useState(false);
 
   useEffect(() => {
-    const accessToken = Cookies.get(NEXT_PUBLIC_COOKIE_TOKEN_NAME);
+    const accessToken = Cookies.get(NEXT_PUBLIC_COOKIE_TOKEN_NAME || '');
     setIsValidToken(!!accessToken);
   }, []);
 
